@@ -3,6 +3,7 @@ const { MongoClient } = require('mongodb');
 const nodemailer = require('nodemailer');
 const { getProductPage, getProductPrice , calculateChangePercentage , sortPrices , cleanPrice } = require('./utils/utils');
 
+console.log("URI : " , process.env.MONGODB_URI)
 const client = new MongoClient(process.env.MONGODB_URI)
 
 const getDB = async () =>{
