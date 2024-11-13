@@ -1,9 +1,10 @@
+require('dotenv').config()
+const cron = require('node-cron');
 const { MongoClient } = require('mongodb');
 const nodemailer = require('nodemailer');
 const { getProductPage, getProductPrice , calculateChangePercentage , sortPrices , cleanPrice } = require('./utils/utils');
 
-const uri = "mongodb://localhost:27017";
-const client = new MongoClient(uri)
+const client = new MongoClient(process.env.MONGODB_URI)
 
 const getDB = async () =>{
     try{
@@ -43,7 +44,9 @@ const didPriceChange = (latest_price , old_price) =>{
 
 }
 
-const sendEmail = async (recipient , content) =>{
+const sendEmailToSubscribers = async (subscriptions , content) =>{
+
+    let subscribers = subscriptions.map(subscription => subscription.userEmail).join(",")
 
     // Create a transporter with your email provider settings
     const transporter = nodemailer.createTransport({
@@ -55,18 +58,43 @@ const sendEmail = async (recipient , content) =>{
             rejectUnauthorized : true
         },
         auth: {
-            user: 'price.wice.info@gmail.com', // your email
-            pass: 'tzim fyta mpki lczo'    // your email password or app-specific password
+            user: process.env.EMAIL_ADDRESS, // your email
+            pass: process.env.EMAIL_PASS   // your email password or app-specific password
         }
     });
-
+    
     // Email options
     const mailOptions = {
         from: 'price.wice.info@gmail.com',    // sender address
-        to: recipient, // list of receivers
-        subject: `Price Alert ! Check your item's latest price`,     // Subject line
-        text: `Mate the price of the product you subcribed to just changed from PKR ${content.old_price} to PKR ${content.new_price} . Thats a %${content.percent_change} change.`,  // plain text body
-        html: `<p>Mate the price of the product you subcribed to just changed from <strong> PKR ${content.old_price} </strong> to <strong> PKR ${content.new_price} </strong>  . Thats a <strong>  %${content.percent_change} </strong>  change.</p>` // html body
+        to: subscribers, // list of receivers
+        subject: 'Price Update on Your Subscribed Product',
+        text: `Hi there,
+    
+            The price of the product you subscribed to, "${content.url}," has recently changed. 
+            
+            Previous Price: PKR ${content.old_price}
+            Current Price: PKR ${content.new_price}
+            Price Change: ${content.percent_change > 0 ? 'Decreased' : 'Increased'} by ${Math.abs(content.percent_change)}%
+            
+            Thank you for subscribing to Price-Wice alerts. We’re here to keep you updated on the latest price changes for your favorite products.
+            
+            Best regards,  
+            The Price-Wice Team
+            
+            If you no longer wish to receive these alerts, you can unsubscribe`,
+        
+        html: `<p>Hi there,</p>
+                <p>The price of the product you subscribed to, "<strong>${content.url}</strong>," has recently changed.</p>
+                <ul>
+                    <li><strong>Previous Price:</strong> PKR ${content.old_price}</li>
+                    <li><strong>Current Price:</strong> PKR ${content.new_price}</li>
+                    <li><strong>Price Change:</strong> ${content.percent_change > 0 ? 'Decreased' : 'Increased'} by ${Math.abs(content.percent_change)}%</li>
+                </ul>
+                <p>Thank you for subscribing to Price-Wice alerts. We’re here to keep you updated on the latest price changes for your favorite products.</p>
+                <p>Best regards,<br>
+                The Price-Wice Team</p>
+                <p style="font-size: 12px;">If you no longer wish to receive these alerts, you can unsubscribe </p>`
+    
     };
 
     // Send email
@@ -76,16 +104,7 @@ const sendEmail = async (recipient , content) =>{
         }
         console.log('Email sent: ' + info.response);
     });
-
-
-}
-
-const sendEmailToSubscribers = async (subscriptions , content) =>{
-    for (let subscription of subscriptions) {
-        
-        console.log("email : " , subscription.userEmail)
-        sendEmail(subscription.userEmail, content)
-    }
+    
 }
 
 
@@ -112,8 +131,15 @@ const checkProductPrices = async () =>{
                 const new_price = latest_price['discounted'] ? latest_price['discounted'] : latest_price['original']
                 const percent_change = calculateChangePercentage(new_price, old_price)
 
+                const new_price_doc = await price_collection.insertOne({
+                    price : new_price,
+                    product_id : product._id,
+                    createdAt : new Date(),
+                    updatedAt : new Date()
+                })
                 const subscriptions = await subscription_collection.find({product_id : product._id}).toArray()
-                sendEmailToSubscribers(subscriptions, {new_price , old_price , percent_change})
+                sendEmailToSubscribers(subscriptions, {new_price , old_price , percent_change , url : product.url})
+                console.log("price changed from " , old_price , " to " , new_price)
             }
             else{
                 console.log("Product price did not change")
@@ -126,4 +152,7 @@ const checkProductPrices = async () =>{
 
 }
 
-checkProductPrices()
+cron.schedule('* * * * *', () => {
+    console.log('running a task every minute');
+    checkProductPrices()
+  });
