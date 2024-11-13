@@ -149,7 +149,10 @@ const checkProductPrices = async () =>{
     catch(err){
         console.error(err)
     }
+    finally{
+        process.exit(0)
+    }
 
 }
 
-checkProductPrices()
+await checkProductPrices()
