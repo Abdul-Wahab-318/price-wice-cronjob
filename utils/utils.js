@@ -1,7 +1,7 @@
-const axios = require('axios')
-const cheerio = require('cheerio')
+import axios from "axios"
+import * as cheerio from "cheerio"
 
-const getProductPage = async (url) => {
+export const getProductPage = async (url) => {
     try{
       const response = await axios.get(url)
   
@@ -19,7 +19,7 @@ const getProductPage = async (url) => {
     }
   }
   
-const cleanPrice = (price) => {
+export const cleanPrice = (price) => {
   
     price = price.replace(/[^\d.]/g, '')
   
@@ -30,7 +30,7 @@ const cleanPrice = (price) => {
   
   }
   
-const sortPrices = (prices) => {
+export const sortPrices = (prices) => {
   
     let filteredPrices = prices.filter(price => price > 200)
     
@@ -40,11 +40,11 @@ const sortPrices = (prices) => {
       return filteredPrices.sort( (a,b) => b-a)
   }
   
-const calculateChangePercentage = (discounted , normal) => {
+export const calculateChangePercentage = (discounted , normal) => {
   return Math.round(100 - ( discounted / normal ) * 100)
 } 
 
-const getProductPrice = (page) =>{
+export const getProductPrice = (page) =>{
 
   const $ = cheerio.load(page);
   $('.baadmay-gateway-wrapper').remove() // remove installment plan information
@@ -102,10 +102,3 @@ const getProductPrice = (page) =>{
 
 }
 
-module.exports = {
-  getProductPage,
-  getProductPrice,
-  cleanPrice,
-  sortPrices,
-  calculateChangePercentage
-}

@@ -1,9 +1,10 @@
-require('dotenv').config()
-const { MongoClient } = require('mongodb');
-const nodemailer = require('nodemailer');
-const { getProductPage, getProductPrice , calculateChangePercentage , sortPrices , cleanPrice } = require('./utils/utils');
+import dotenv from 'dotenv';
+import { MongoClient } from 'mongodb';
+import nodemailer from 'nodemailer';
+import { getProductPage, getProductPrice, calculateChangePercentage, sortPrices, cleanPrice } from './utils/utils.js';
 
-console.log("URI : " , process.env.MONGODB_URI)
+dotenv.config();
+
 const client = new MongoClient("mongodb+srv://wahabmaliq:oQOAIjq1S9WdoXIB@cluster0.jyb0m.mongodb.net/pricewice?retryWrites=true&w=majority&appName=Cluster0")
 
 const getDB = async () =>{
