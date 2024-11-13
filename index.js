@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 const { getProductPage, getProductPrice , calculateChangePercentage , sortPrices , cleanPrice } = require('./utils/utils');
 
 console.log("URI : " , process.env.MONGODB_URI)
-const client = new MongoClient(process.env.MONGODB_URI)
+const client = new MongoClient("mongodb+srv://wahabmaliq:oQOAIjq1S9WdoXIB@cluster0.jyb0m.mongodb.net/pricewice?retryWrites=true&w=majority&appName=Cluster0")
 
 const getDB = async () =>{
     try{
@@ -58,8 +58,8 @@ const sendEmailToSubscribers = async (subscriptions , content) =>{
             rejectUnauthorized : true
         },
         auth: {
-            user: process.env.EMAIL_ADDRESS, // your email
-            pass: process.env.EMAIL_PASS   // your email password or app-specific password
+            user: "tzim fyta mpki lczo", // your email
+            pass: "price.wice.info@gmail.com"   // your email password or app-specific password
         }
     });
     
