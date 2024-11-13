@@ -18,6 +18,6 @@ jobs:
       - name: Run script
         run: npm start
         env:
-          EMAIL_PASS : ${{ secrets.EMAIL_PASS  }}
+          EMAIL_PASS : ${{ secrets.EMAIL_PASS }}
           EMAIL_ADDRESS : ${{ secrets.EMAIL_ADDRESS }}
           MONGODB_URI : ${{ secrets.MONGODB_URI }}
