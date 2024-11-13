@@ -1,5 +1,4 @@
 require('dotenv').config()
-const cron = require('node-cron');
 const { MongoClient } = require('mongodb');
 const nodemailer = require('nodemailer');
 const { getProductPage, getProductPrice , calculateChangePercentage , sortPrices , cleanPrice } = require('./utils/utils');
@@ -152,8 +151,4 @@ const checkProductPrices = async () =>{
 
 }
 
-// cron.schedule('* * * * *', () => {
-//     console.log('running a task every minute');
-//     checkProductPrices()
-//   });
 checkProductPrices()
