@@ -152,7 +152,8 @@ const checkProductPrices = async () =>{
 
 }
 
-cron.schedule('* * * * *', () => {
-    console.log('running a task every minute');
-    checkProductPrices()
-  });
+// cron.schedule('* * * * *', () => {
+//     console.log('running a task every minute');
+//     checkProductPrices()
+//   });
+checkProductPrices()
